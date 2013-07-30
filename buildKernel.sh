@@ -17,6 +17,7 @@ PUNCHCARD=`date "+%m-%d-%Y_%H.%M"`
 
 CPU_JOB_NUM=8
 
+# Copy the passed config to default
 cp -R config/$2_config arch/arm/configs/gc1pq_00_defconfig
 
 if [ -e $KERNELSPEC/buildimg/boot.img ]; then
@@ -78,16 +79,36 @@ if [ -e output/boot.tar ]; then
 rm -R output/boot.tar.md5.gz
 fi
 
-gnutar -H ustar -c output/boot.img > output/boot.tar
-cp -r output/boot.tar output/boot.tar.md5
-md5 -r output/boot.tar.md5 >> output/boot.tar.md5
-gzip output/boot.tar.md5 -c -v > output/boot.tar.md5.gz
-KERNELFILE=boot.$PUNCHCARD.tar.md5.gz
-cp -r output/boot.tar.md5.gz $KERNELREPO/boot.tar.md5.gz
-cp -r $KERNELREPO/boot.tar.md5.gz $KERNELREPO/gooserver/$KERNELFILE
+IMAGEFILE=boot.$PUNCHCARD.img
+KERNELFILE=boot.$PUNCHCARD.tar
+
+cp -r  output/boot.img $KERNELREPO/gooserver/$IMAGEFILE
+scp -P 2222 $KERNELREPO/gooserver/$IMAGEFILE $GOOSERVER/galaxycam
+
+if cat /etc/issue | grep Ubuntu; then
+    tar -H ustar -c output/boot.img > output/boot.tar
+else
+    gnutar -H ustar -c output/boot.img > output/boot.tar
+fi
+# Create an md5 kernel image
+if [ "$1" == "1" ]; then
+    KERNELFILE=$KERNELFILE.md5.gz
+    cp -r output/boot.tar output/boot.tar.md5
+    if cat /etc/issue | grep Ubuntu; then
+        md5sum -r output/boot.tar.md5 >> output/boot.tar.md5
+    else
+        md5 -r output/boot.tar.md5 >> output/boot.tar.md5
+    fi
+    gzip output/boot.tar.md5 -c -v > output/boot.tar.md5.gz
+    cp -r output/boot.tar.md5.gz $KERNELREPO/boot.tar.md5.gz
+    cp -r $KERNELREPO/boot.tar.md5.gz $KERNELREPO/gooserver/$KERNELFILE
+# Skip md5 hash generation
+else
+    cp -r output/boot.tar $KERNELREPO/boot.tar
+    cp -r $KERNELREPO/boot.tar $KERNELREPO/gooserver/$KERNELFILE
+fi
 scp -P 2222 $KERNELREPO/gooserver/$KERNELFILE $GOOSERVER/galaxycam
 rm -R $KERNELREPO/gooserver/$KERNELFILE
-
 fi
 
 cd $KERNELSPEC
