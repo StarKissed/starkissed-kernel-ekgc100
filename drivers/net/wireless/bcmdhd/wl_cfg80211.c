@@ -3483,10 +3483,12 @@ wl_cfg80211_add_key(struct wiphy *wiphy, struct net_device *dev,
 
 	bssidx = wl_cfgp2p_find_idx(wl, dev);
 
-	if (mac_addr) {
-		wl_add_keyext(wiphy, dev, key_idx, mac_addr, params);
-		goto exit;
-	}
+	if (mac_addr &&
+        ((params->cipher != WLAN_CIPHER_SUITE_WEP40) &&
+         (params->cipher != WLAN_CIPHER_SUITE_WEP104))) {
+        wl_add_keyext(wiphy, dev, key_idx, mac_addr, params);
+        goto exit;
+    }
 	memset(&key, 0, sizeof(key));
 
 	key.len = (u32) params->key_len;
