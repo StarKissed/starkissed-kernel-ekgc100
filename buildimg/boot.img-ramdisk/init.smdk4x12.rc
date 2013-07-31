@@ -5,7 +5,7 @@ on early-init
     export EXTERNAL_STORAGE /storage/sdcard0
     mkdir /storage 0550 system sdcard_r
     mkdir /storage/sdcard0 0000 system system
-    symlink /storage/sdcard0 /sdcard
+    # symlink /storage/sdcard0 /sdcard
     symlink /storage/sdcard0 /mnt/sdcard
     mkdir /preload
 # map "real" external storages paths also in same way. backwards compatibility.
@@ -25,6 +25,8 @@ on early-init
     mkdir /storage/UsbDriveD 0000 system system
     mkdir /storage/UsbDriveE 0000 system system
     mkdir /storage/UsbDriveF 0000 system system
+
+    symlink /storage/extSdCard /sdcard
 
     mkdir /efs 0771 radio system
 
