@@ -4,8 +4,6 @@
 
 # This script is designed by Twisted Playground for use on MacOSX 10.7 but can be modified for other distributions of Mac and Linux
 
-PROPER=`echo $1 | sed 's/\([a-z]\)\([a-zA-Z0-9]*\)/\u\1\2/g'`
-
 HANDLE=TwistedZero
 KERNELSPEC=/Volumes/android/EK-GC100_Galaxy_Cam
 KERNELREPO=/Users/TwistedZero/Public/Dropbox/TwistedServer/Playground/kernels
@@ -22,40 +20,37 @@ read profile
 
 case $profile in
 1)
-zipfile=$HANDLE"_StarKissed-EKGC-Wifi.zip"
-KENRELZIP="StarKissed-EKGC_$PUNCHCARD-Wifi.zip"
-BUILDTYPE=buildimg
+TYPE=wifi
 ;;
 2)
-zipfile=$HANDLE"_StarKissed-EKGC-ATT.zip"
-KENRELZIP="StarKissed-EKGC_$PUNCHCARD-ATT.zip"
-BUILDTYPE=buildatt
+TYPE=att
 ;;
 3)
-zipfile=$HANDLE"_StarKissed-EKGC-VZW.zip"
-KENRELZIP="StarKissed-EKGC_$PUNCHCARD-VZW.zip"
-BUILDTYPE=buildvzw
+TYPE=vzw
 ;;
 *)
 exit 1
 ;;
 esac
 
-MODULEOUT=$KERNELSPEC/$BUILDTYPE/boot.img-ramdisk
+PROPER=`echo $TYPE | sed 's/\([a-z]\)\([a-zA-Z0-9]*\)/\u\1\2/g'`
+MODULEOUT=$KERNELSPEC/build$TYPE/boot.img-ramdisk
+zipfile=$HANDLE"_StarKissed-EKGC-"$PROPER".zip"
+KENRELZIP="StarKissed-EKGC_$PUNCHCARD-"$PROPER".zip"
 
 CPU_JOB_NUM=8
 
 # Copy the passed config to default
 cp -R config/$1_config arch/arm/configs/gc1pq_00_defconfig
 
-if [ -e $KERNELSPEC/$BUILDTYPE/boot.img ]; then
-    rm -R $KERNELSPEC/$BUILDTYPE/boot.img
+if [ -e $KERNELSPEC/build$TYPE/boot.img ]; then
+    rm -R $KERNELSPEC/build$TYPE/boot.img
 fi
-if [ -e $KERNELSPEC/$BUILDTYPE/newramdisk.cpio.gz ]; then
-    rm -R $KERNELSPEC/$BUILDTYPE/newramdisk.cpio.gz
+if [ -e $KERNELSPEC/build$TYPE/newramdisk.cpio.gz ]; then
+    rm -R $KERNELSPEC/build$TYPE/newramdisk.cpio.gz
 fi
-if [ -e $KERNELSPEC/$BUILDTYPE/zImage ]; then
-    rm -R $KERNELSPEC/$BUILDTYPE/zImage
+if [ -e $KERNELSPEC/build$TYPE/zImage ]; then
+    rm -R $KERNELSPEC/build$TYPE/zImage
 fi
 
 make clean -j$CPU_JOB_NUM
@@ -88,9 +83,9 @@ if [ -e arch/arm/boot/zImage ]; then
 
     fi
 
-    cp -R arch/arm/boot/zImage $BUILDTYPE
+    cp -R arch/arm/boot/zImage build$TYPE
 
-    cd $BUILDTYPE
+    cd build$TYPE
     ./img.sh
 
     echo "building boot package"
@@ -107,8 +102,8 @@ if [ -e arch/arm/boot/zImage ]; then
         rm -R output/boot.tar.md5.gz
     fi
 
-    IMAGEFILE=boot.$PUNCHCARD.img
-    KERNELFILE=boot.$PUNCHCARD.tar
+    IMAGEFILE=boot.$TYPE.$PUNCHCARD.img
+    KERNELFILE=boot.$TYPE.$PUNCHCARD.tar
 
     cp -r  output/boot.img $KERNELREPO/gooserver/$IMAGEFILE
     scp -P 2222 $KERNELREPO/gooserver/$IMAGEFILE $GOOSERVER/galaxycam
@@ -131,8 +126,8 @@ if [ -e arch/arm/boot/zImage ]; then
     else
         gnutar -H ustar -c output/boot.img > output/boot.tar
     fi
-    cp -r output/boot.tar $KERNELREPO/camera/boot.tar
-    cp -r $KERNELREPO/camera/boot.tar $KERNELREPO/gooserver
+    cp -r output/boot.tar $KERNELREPO/camera/boot.$TYPE.tar
+    cp -r $KERNELREPO/camera/boot.$TYPE.tar $KERNELREPO/gooserver/$KERNELFILE
     scp -P 2222 $KERNELREPO/gooserver/$KERNELFILE $GOOSERVER/galaxycam
     rm -R $KERNELREPO/gooserver/$KERNELFILE
     cp -r output/boot.tar output/boot.tar.md5
@@ -142,8 +137,8 @@ if [ -e arch/arm/boot/zImage ]; then
         md5 -r output/boot.tar.md5 >> output/boot.tar.md5
     fi
     gzip output/boot.tar.md5 -c -v > output/boot.tar.md5.gz
-    cp -r output/boot.tar.md5.gz $KERNELREPO/camera/boot.tar.md5.gz
-    cp -r $KERNELREPO/camera/boot.tar.md5.gz $KERNELREPO/gooserver/$KERNELFILE.md5.gz
+    cp -r output/boot.tar.md5.gz $KERNELREPO/camera/boot.$TYPE.tar.md5.gz
+    cp -r $KERNELREPO/camera/boot.$TYPE.tar.md5.gz $KERNELREPO/gooserver/$KERNELFILE.md5.gz
     scp -P 2222 $KERNELREPO/gooserver/$KERNELFILE.md5.gz $GOOSERVER/galaxycam
     rm -R $KERNELREPO/gooserver/$KERNELFILE.md5.gz
 fi
