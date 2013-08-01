@@ -1,0 +1,18 @@
+ui_print(" ");
+ui_print("===============================================");
+ui_print("|                                             |");
+ui_print("|        Galaxy Camera StarKissed Kernel      |");
+ui_print("|                  for 4.1.2                  |");
+ui_print("|             by TwistedUmbrella              |");
+ui_print("|                                             |");
+ui_print("===============================================");
+ui_print(" ");
+
+ui_print(">>> Installing Kernel...");
+package_extract_file("boot.img", "/tmp/boot.img");
+set_perm(0, 0, 0777, "/tmp/boot.img");
+run_program("/sbin/busybox", "dd", "if=/tmp/boot.img", "of=/dev/block/platform/dw_mmc/by-name/BOOT");
+ui_print(" ");
+
+ui_print(">>> Done!");
+ui_print(" ");
