@@ -88,3 +88,6 @@ obj-$(CONFIG_MACH_M0_CTC)   += cw_tty.o
 
 # Secure OS Mobicore Interface
 obj-$(CONFIG_MOBICORE_SUPPORT)  += tzic.o
+
+obj-$(CONFIG_FSYNC_CONTROL)	+= fsync_control.o
+obj-$(CONFIG_VIBRATOR_CONTROL)	+= vibrator_control.o

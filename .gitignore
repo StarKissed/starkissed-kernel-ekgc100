@@ -90,3 +90,5 @@ arch/arm/boot/compressed/piggy.xzkern
 */*.md5
 
 0
+arch/arm/boot/Image
+arch/arm/boot/zImage

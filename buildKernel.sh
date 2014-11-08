@@ -7,14 +7,15 @@
 HANDLE=TwistedZero
 KERNELSPEC=/Volumes/android/EK-GC100_Galaxy_Cam
 KERNELREPO=/Users/TwistedZero/Public/Dropbox/TwistedServer/Playground/kernels
-#TOOLCHAIN_PREFIX=/Volumes/android/android-toolchain-eabi/bin/arm-eabi-
+#TOOLCHAIN_PREFIX=/Volumes/android/android-toolchain-eabi-4.6/bin/arm-eabi-
 TOOLCHAIN_PREFIX=/Volumes/android/android-tzb_ics4.0.1/prebuilt/darwin-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-
-GOOSERVER=loungekatt@upload.goo.im:public_html
+GOOSERVER=upload.goo.im:public_html
 PUNCHCARD=`date "+%m-%d-%Y_%H.%M"`
 
 echo "1. Wifi"
 echo "2. AT&T"
 echo "3. VZW"
+echo "4. All"
 echo "Please Choose: "
 read profile
 
@@ -28,6 +29,25 @@ TYPE=att
 3)
 TYPE=vzw
 ;;
+4)
+zipfile=$HANDLE"_StarKissed-EKGC.zip"
+KENRELZIP="StarKissed-EKGC_$PUNCHCARD.zip"
+cp -R buildatt/boot.img starkissed/kernel/att
+cp -R buildwifi/boot.img starkissed/kernel/wifi
+cp -R buildvzw/boot.img starkissed/kernel/vzw
+cd starkissed
+rm *.zip
+zip -r $zipfile *
+cd ../
+cp -R $KERNELSPEC/starkissed/$zipfile $KERNELREPO/$zipfile
+
+if [ -e $KERNELREPO/$zipfile ]; then
+    cp -R $KERNELREPO/$zipfile ~/.goo/$KENRELZIP
+    scp -P 2222 ~/.goo/$KENRELZIP  $GOOSERVER/galaxycam/kernel
+    rm -R ~/.goo/$KENRELZIP
+fi
+exit 1
+;;
 *)
 exit 1
 ;;
@@ -35,8 +55,8 @@ esac
 
 PROPER=`echo $TYPE | sed 's/\([a-z]\)\([a-zA-Z0-9]*\)/\u\1\2/g'`
 MODULEOUT=$KERNELSPEC/build$TYPE/boot.img-ramdisk
-zipfile=$HANDLE"_StarKissed-EKGC-"$PROPER".zip"
-KENRELZIP="StarKissed-EKGC_$PUNCHCARD-"$PROPER".zip"
+IMAGEFILE=boot.$PUNCHCARD-$PROPER.img
+KERNELFILE=boot.$PUNCHCARD-$PROPER.tar
 
 CPU_JOB_NUM=8
 
@@ -102,45 +122,31 @@ if [ -e arch/arm/boot/zImage ]; then
         rm -R output/boot.tar.md5.gz
     fi
 
-    IMAGEFILE=boot.$TYPE.$PUNCHCARD.img
-    KERNELFILE=boot.$TYPE.$PUNCHCARD.tar
-
-    cp -r  output/boot.img $KERNELREPO/gooserver/$IMAGEFILE
-    scp -P 2222 $KERNELREPO/gooserver/$IMAGEFILE $GOOSERVER/galaxycam
-
-    cp -R output/boot.img starkissed
-    cd starkissed
-    rm *.zip
-    zip -r $zipfile *
-    cd ../
-    cp -R $KERNELSPEC/starkissed/$zipfile $KERNELREPO/$zipfile
-
-    if [ -e $KERNELREPO/$zipfile ]; then
-        cp -R $KERNELREPO/$zipfile $KERNELREPO/gooserver/$KENRELZIP
-        scp -P 2222 $KERNELREPO/gooserver/$KENRELZIP  $GOOSERVER/galaxycam
-        rm -R $KERNELREPO/gooserver/$KENRELZIP
-    fi
+    cp -r  output/boot.img $KERNELREPO/camera/boot-$PROPER.img
 
     if cat /etc/issue | grep Ubuntu; then
         tar -H ustar -c output/boot.img > output/boot.tar
     else
-        gnutar -H ustar -c output/boot.img > output/boot.tar
+        tar --format ustar -c output/boot.img > output/boot.tar
     fi
-    cp -r output/boot.tar $KERNELREPO/camera/boot.$TYPE.tar
-    cp -r $KERNELREPO/camera/boot.$TYPE.tar $KERNELREPO/gooserver/$KERNELFILE
-    scp -P 2222 $KERNELREPO/gooserver/$KERNELFILE $GOOSERVER/galaxycam
-    rm -R $KERNELREPO/gooserver/$KERNELFILE
+    cp -r output/boot.tar $KERNELREPO/camera/boot-$PROPER.tar
     cp -r output/boot.tar output/boot.tar.md5
     if cat /etc/issue | grep Ubuntu; then
-        md5sum -r output/boot.tar.md5 >> output/boot.tar.md5
+        md5sum -t output/boot.tar.md5 >> output/boot.tar.md5
     else
         md5 -r output/boot.tar.md5 >> output/boot.tar.md5
     fi
-    gzip output/boot.tar.md5 -c -v > output/boot.tar.md5.gz
-    cp -r output/boot.tar.md5.gz $KERNELREPO/camera/boot.$TYPE.tar.md5.gz
-    cp -r $KERNELREPO/camera/boot.$TYPE.tar.md5.gz $KERNELREPO/gooserver/$KERNELFILE.md5.gz
-    scp -P 2222 $KERNELREPO/gooserver/$KERNELFILE.md5.gz $GOOSERVER/galaxycam
-    rm -R $KERNELREPO/gooserver/$KERNELFILE.md5.gz
+    cp -r output/boot.tar.md5 $KERNELREPO/camera/boot-$PROPER.tar.md5
+
+    cp -r  $KERNELREPO/camera/boot-$PROPER.img ~/.goo/$IMAGEFILE
+    scp ~/.goo/$IMAGEFILE $GOOSERVER/galaxycam/kernel
+    rm -R ~/.goo/$IMAGEFILE
+    cp -r $KERNELREPO/camera/boot-$PROPER.tar ~/.goo/$KERNELFILE
+    scp ~/.goo/$KERNELFILE $GOOSERVER/galaxycam/kernel
+    rm -R ~/.goo/$KERNELFILE
+    cp -r $KERNELREPO/camera/boot-$PROPER.tar.md5 ~/.goo/$KERNELFILE.md5
+    scp ~/.goo/$KERNELFILE.md5 $GOOSERVER/galaxycam/kernel
+    rm -R ~/.goo/$KERNELFILE.md5
 fi
 
 cd $KERNELSPEC
