@@ -5,7 +5,6 @@
 # This script is designed by Twisted Playground for use on MacOSX 10.7 but can be modified for other distributions of Mac and Linux
 
 HANDLE=TwistedZero
-KERNELSPEC=$(pwd)
 KERNELREPO=/Users/TwistedZero/Public/Dropbox/TwistedServer/Playground/kernels
 #TOOLCHAIN_PREFIX=/Volumes/android/android-toolchain-eabi-4.6/bin/arm-eabi-
 TOOLCHAIN_PREFIX=/Volumes/android/android-tzb_ics4.0.1/prebuilt/darwin-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-
@@ -39,7 +38,7 @@ cd starkissed
 rm *.zip
 zip -r $zipfile *
 cd ../
-cp -R $KERNELSPEC/starkissed/$zipfile $KERNELREPO/$zipfile
+cp -R starkissed/$zipfile $KERNELREPO/$zipfile
 
 if [ -e $KERNELREPO/$zipfile ]; then
     cp -R $KERNELREPO/$zipfile ~/.goo/$KENRELZIP
@@ -54,7 +53,7 @@ exit 1
 esac
 
 PROPER=`echo $TYPE | sed 's/\([a-z]\)\([a-zA-Z0-9]*\)/\u\1\2/g'`
-MODULEOUT=$KERNELSPEC/build$TYPE/boot.img-ramdisk
+MODULEOUT=build$TYPE/boot.img-ramdisk
 IMAGEFILE=boot.$PUNCHCARD-$PROPER.img
 KERNELFILE=boot.$PUNCHCARD-$PROPER.tar
 
@@ -66,14 +65,14 @@ CPU_JOB_NUM=$((($CORES * $THREADS) / 2))
 # Copy the passed config to default
 cp -R config/$1_config arch/arm/configs/gc1pq_00_defconfig
 
-if [ -e $KERNELSPEC/build$TYPE/boot.img ]; then
-    rm -R $KERNELSPEC/build$TYPE/boot.img
+if [ -e build$TYPE/boot.img ]; then
+    rm -R build$TYPE/boot.img
 fi
-if [ -e $KERNELSPEC/build$TYPE/newramdisk.cpio.gz ]; then
-    rm -R $KERNELSPEC/build$TYPE/newramdisk.cpio.gz
+if [ -e build$TYPE/newramdisk.cpio.gz ]; then
+    rm -R build$TYPE/newramdisk.cpio.gz
 fi
-if [ -e $KERNELSPEC/build$TYPE/zImage ]; then
-    rm -R $KERNELSPEC/build$TYPE/zImage
+if [ -e build$TYPE/zImage ]; then
+    rm -R build$TYPE/zImage
 fi
 
 make clean -j$CPU_JOB_NUM
@@ -151,5 +150,3 @@ if [ -e arch/arm/boot/zImage ]; then
     scp ~/.goo/$KERNELFILE.md5 $GOOSERVER/galaxycam/kernel
     rm -R ~/.goo/$KERNELFILE.md5
 fi
-
-cd $KERNELSPEC
