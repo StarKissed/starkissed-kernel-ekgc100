@@ -4,8 +4,9 @@
 
 # This script is designed by Twisted Playground for use on MacOSX 10.7 but can be modified for other distributions of Mac and Linux
 
+KERNELDIR=`pwd`
 HANDLE=TwistedZero
-KERNELREPO=/Users/TwistedZero/Public/Dropbox/TwistedServer/Playground/kernels
+KERNELREPO=$DROPBOX_SERVER/TwistedServer/StarKissed/kernels
 #TOOLCHAIN_PREFIX=/Volumes/android/android-toolchain-eabi-4.6/bin/arm-eabi-
 TOOLCHAIN_PREFIX=/Volumes/android/android-tzb_ics4.0.1/prebuilt/darwin-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-
 GOOSERVER=upload.goo.im:public_html
@@ -150,3 +151,5 @@ if [ -e arch/arm/boot/zImage ]; then
     scp ~/.goo/$KERNELFILE.md5 $GOOSERVER/galaxycam/kernel
     rm -R ~/.goo/$KERNELFILE.md5
 fi
+
+cd $KERNELDIR
